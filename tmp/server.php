@@ -14,7 +14,7 @@ $debug = false;
 while (true) {
     $changed = $sockets;
 //    var_dump($changed);
-    socket_select($changed, $write = NULL, $except = NULL, 0);
+    socket_select($changed, $write = NULL, $except = NULL, NULL);
     foreach ($changed as $socket) {
         if ($socket == $master) {
             $client = socket_accept($master);
@@ -25,20 +25,19 @@ while (true) {
                 connect($client);
             }
         } else {
-            $bytes = @socket_recv($socket, $buffer, 2048, 0);
+            $bytes = socket_recv($socket, $buffer, 2048, 0);
             if ($bytes == 0) {
-                disconnect($socket);
+//                var_dump($socket);
+//                die();
+//                echo ("socket_recv() failed; reason: " . socket_strerror(socket_last_error($socket)) . "\n");
+                socket_close($socket);
+//                disconnect($socket);
             } else {
                 $user = getuserbysocket($socket);
                 if (!$user->handshake) {
                     handshake($user, $buffer, $socket);
                 } else {
-//                    $action = unmask($buffer);
-//                    socket_write($client, $action, strlen($action));
-//                    console("Data from client: " . $action);
-//                    socket_close($socket);
                     process($user, $buffer);
-//                    disconnect($socket);
                 }
             }
         }
@@ -129,7 +128,7 @@ function handshake($user, $headers, $socket) {
         console("The client doesn't support WebSocket");
         return false;
     }
-
+//die($version);
     if ($version == 13) {
         // Extract header variables
         if (preg_match("/GET (.*) HTTP/", $headers, $match))

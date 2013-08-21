@@ -16,7 +16,6 @@
                 try {
                     socket = new WebSocket(host);
                     log('WebSocket - status ' + socket.readyState);
-
                     socket.onopen = function(msg) {
                         log("Welcome - status " + this.readyState);
                     };
